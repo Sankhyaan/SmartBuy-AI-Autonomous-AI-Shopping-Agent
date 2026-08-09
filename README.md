@@ -8,7 +8,7 @@
 
 # 🛒 SmartBuy AI — Autonomous AI Shopping Agent
 
-**SmartBuy AI** is an autonomous AI-powered shopping agent that browses e-commerce websites (Amazon & Flipkart) in real time, extracts product data, and presents it through a sleek, modern dashboard — just like a human would shop, but automated.
+**SmartBuy AI** is an agentic AI system that autonomously researches and compares products across Amazon and Flipkart, asks context-aware questions, uses web-based RAG for additional product knowledge, and executes the purchasing workflow through browser automation up to the payment stage.
 
 > **Current Status:** Phase 1 (Architecture) ✅ and Phase 2 (Browser Automation) ✅ are complete. Phase 3 (AI Reasoning with LangGraph, RAG, and Database) is planned.
 
