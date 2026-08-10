@@ -16,7 +16,7 @@ export default function Navbar() {
       </div>
 
       <div className="navbar-center">
-        <span className="phase-badge">Phase 1 · Foundation</span>
+        <span className="phase-badge">Phase 2 · Browser Automation</span>
       </div>
 
       <div className="navbar-right">
