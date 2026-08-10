@@ -12,6 +12,15 @@ const apiClient = axios.create({
   timeout: 60000, // 60s — browser automation requests can take a while
 });
 
+// Request interceptor for logging and header injection
+apiClient.interceptors.request.use(
+  (config) => {
+    config.headers["X-Client-Version"] = "0.2.0";
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 export default apiClient;
 
 // ── Browser API Helpers ──────────────────────────────────────────────────────
@@ -26,8 +35,8 @@ export const browserAPI = {
     apiClient.post("/browser/scroll", { direction, amount }),
 
   searchAmazon: (query, max_results = 10) =>
-    apiClient.post("/browser/amazon/search", { query, max_results }),
+    apiClient.post("/browser/amazon/search", { query: query.trim(), max_results }),
 
   searchFlipkart: (query, max_results = 10) =>
-    apiClient.post("/browser/flipkart/search", { query, max_results }),
+    apiClient.post("/browser/flipkart/search", { query: query.trim(), max_results }),
 };
