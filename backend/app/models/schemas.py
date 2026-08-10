@@ -48,8 +48,8 @@ class OpenUrlRequest(BaseModel):
 
 
 class SearchRequest(BaseModel):
-    query: str = Field(..., min_length=1, description="Search term e.g. wireless headphones")
-    max_results: int = Field(10, ge=1, le=30, description="Max products to return")
+    query: str = Field(..., min_length=1, max_length=200, description="Search term e.g. wireless headphones", examples=["laptop", "wireless headphones"])
+    max_results: int = Field(10, ge=1, le=30, description="Max products to return", examples=[10])
 
 
 class ScreenshotResponse(BaseModel):
