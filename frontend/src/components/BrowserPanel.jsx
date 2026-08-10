@@ -188,6 +188,19 @@ export default function BrowserPanel() {
                   onKeyDown={handleKeyDown}
                   disabled={loading}
                 />
+                {searchQuery && !loading && (
+                  <button
+                    className="search-clear-btn"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setProducts([]);
+                      setSearchInfo(null);
+                    }}
+                    title="Clear search"
+                  >
+                    ✕
+                  </button>
+                )}
                 <button
                   className="search-btn"
                   onClick={handleSearch}
