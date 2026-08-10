@@ -637,6 +637,7 @@ html, body, #root {
 .search-bar {
   display: flex;
   gap: 6px;
+  position: relative;
 }
 
 .search-input {
@@ -648,6 +649,26 @@ html, body, #root {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
+  outline: none;
+  transition: var(--transition);
+}
+
+.search-clear-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  padding: 0 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.search-clear-btn:hover {
+  color: var(--text-primary);
+}
   transition: var(--transition);
 }
 
