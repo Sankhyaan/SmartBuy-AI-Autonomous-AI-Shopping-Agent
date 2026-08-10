@@ -33,25 +33,25 @@ async def smooth_scroll(page: Page, scrolls: int = 3, distance: int = 600) -> No
         await asyncio.sleep(0.5)
 
 
-async def safe_text(element: ElementHandle, selector: str) -> Optional[str]:
-    """Safely extract text content from a sub-element."""
+async def safe_text(element: ElementHandle, selector: str, fallback: Optional[str] = None) -> Optional[str]:
+    """Safely extract text content from a sub-element with an optional fallback default."""
     try:
         sub = await element.query_selector(selector)
         if sub:
             text = await sub.text_content()
-            return text.strip() if text else None
+            return text.strip() if text and text.strip() else fallback
     except Exception:
         pass
-    return None
+    return fallback
 
 
-async def safe_attribute(element: ElementHandle, selector: str, attribute: str) -> Optional[str]:
-    """Safely extract an attribute value (e.g. href, src) from a sub-element."""
+async def safe_attribute(element: ElementHandle, selector: str, attribute: str, fallback: Optional[str] = None) -> Optional[str]:
+    """Safely extract an attribute value (e.g. href, src) from a sub-element with an optional fallback."""
     try:
         sub = await element.query_selector(selector)
         if sub:
             val = await sub.get_attribute(attribute)
-            return val.strip() if val else None
+            return val.strip() if val and val.strip() else fallback
     except Exception:
         pass
-    return None
+    return fallback
