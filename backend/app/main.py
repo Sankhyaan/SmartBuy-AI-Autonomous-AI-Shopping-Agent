@@ -50,6 +50,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.middleware("http")
+async def add_process_time_header(request, call_next):
+    import time
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    response.headers["X-Process-Time"] = f"{process_time:.4f}s"
+    return response
+
 # ── Routers ───────────────────────────────────────────────────────────────────
 app.include_router(chat_router)
 app.include_router(browser_router)
