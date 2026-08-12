@@ -115,15 +115,33 @@ export default function BrowserPanel() {
         <span className="panel-title">Browser Automation</span>
         <div className="panel-header-actions">
           {!status.is_running ? (
-            <button className="btn-panel btn-start" onClick={handleStart} disabled={actionLoading}>
+            <button
+              className="btn-panel btn-start"
+              onClick={handleStart}
+              disabled={actionLoading}
+              title="Launch Chromium Browser"
+              aria-label="Start Playwright Browser"
+            >
               {actionLoading ? "Starting..." : "▶ Start"}
             </button>
           ) : (
             <>
-              <button className="btn-panel btn-screenshot" onClick={handleScreenshot} disabled={actionLoading}>
+              <button
+                className="btn-panel btn-screenshot"
+                onClick={handleScreenshot}
+                disabled={actionLoading}
+                title="Capture live screenshot"
+                aria-label="Capture page screenshot"
+              >
                 📷
               </button>
-              <button className="btn-panel btn-stop" onClick={handleStop} disabled={actionLoading}>
+              <button
+                className="btn-panel btn-stop"
+                onClick={handleStop}
+                disabled={actionLoading}
+                title="Stop browser instance"
+                aria-label="Stop Playwright Browser"
+              >
                 ⏹ Stop
               </button>
             </>
