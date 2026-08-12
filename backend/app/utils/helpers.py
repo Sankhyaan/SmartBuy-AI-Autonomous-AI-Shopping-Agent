@@ -34,3 +34,11 @@ def clean_price_string(raw_price: Optional[str]) -> str:
     if match:
         return match.group(0).replace(" ", "")
     return raw_price.strip()
+
+
+def format_currency(amount: float, symbol: str = "₹") -> str:
+    """Format a numerical amount into INR currency string format (e.g. ₹12,999.00)."""
+    try:
+        return f"{symbol}{amount:,.2f}"
+    except (ValueError, TypeError):
+        return f"{symbol}0.00"
