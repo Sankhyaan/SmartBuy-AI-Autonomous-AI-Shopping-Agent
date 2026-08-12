@@ -227,6 +227,24 @@ export default function BrowserPanel() {
                   {loading ? <div className="spinner-sm" /> : "🔍"}
                 </button>
               </div>
+              {/* Quick suggestion tags */}
+              {!searchInfo && !loading && (
+                <div className="quick-suggestions">
+                  <span className="suggestion-label">Try searching:</span>
+                  {["laptop", "headphones", "smartwatch", "running shoes"].map((tag) => (
+                    <button
+                      key={tag}
+                      className="suggestion-chip"
+                      onClick={() => {
+                        setSearchQuery(tag);
+                        setActiveTab(activeTab);
+                      }}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Search info */}
