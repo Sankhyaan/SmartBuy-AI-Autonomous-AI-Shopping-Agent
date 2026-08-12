@@ -31,6 +31,13 @@
 - 🛡️ **Anti-detection** with realistic User-Agent headers and human-like scrolling
 - 🔄 **Singleton browser manager** — one persistent browser instance for all operations
 
+#### 🛍️ Scraper Support Matrix
+
+| Platform | Search | Extraction Engine | Title | Price | Ratings | Image Thumbnails |
+|----------|--------|-------------------|-------|-------|---------|------------------|
+| **Amazon India** | ✅ Verified | CSS Selectors (`s-search-result`) | ✅ | ✅ (₹) | ✅ | ✅ |
+| **Flipkart** | ✅ Verified | Layout-Agnostic DOM Traversal | ✅ | ✅ (₹) | ✅ | ✅ |
+
 ---
 
 ## 🏗️ Architecture
