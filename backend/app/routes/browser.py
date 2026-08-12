@@ -84,10 +84,14 @@ async def amazon_search(request: SearchRequest):
     if not browser_manager.is_running:
         raise HTTPException(status_code=400, detail="Browser is not running. Start it first.")
 
+    clean_query = request.query.strip()
+    if not clean_query:
+        raise HTTPException(status_code=400, detail="Search query cannot be empty.")
+
     try:
-        products = await search_amazon(request.query, request.max_results)
+        products = await search_amazon(clean_query, request.max_results)
         return ProductSearchResponse(
-            query=request.query,
+            query=clean_query,
             source="Amazon",
             total=len(products),
             products=products,
@@ -102,10 +106,14 @@ async def flipkart_search(request: SearchRequest):
     if not browser_manager.is_running:
         raise HTTPException(status_code=400, detail="Browser is not running. Start it first.")
 
+    clean_query = request.query.strip()
+    if not clean_query:
+        raise HTTPException(status_code=400, detail="Search query cannot be empty.")
+
     try:
-        products = await search_flipkart(request.query, request.max_results)
+        products = await search_flipkart(clean_query, request.max_results)
         return ProductSearchResponse(
-            query=request.query,
+            query=clean_query,
             source="Flipkart",
             total=len(products),
             products=products,
