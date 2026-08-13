@@ -26,11 +26,25 @@ async def configure_anti_detection(page: Page) -> None:
     })
 
 
-async def smooth_scroll(page: Page, scrolls: int = 3, distance: int = 600) -> None:
+async def smooth_scroll(page: Page, scrolls: int = 6, distance: int = 700) -> None:
     """Scroll down incrementally to trigger lazy-loaded images and products."""
     for _ in range(scrolls):
         await page.evaluate(f"window.scrollBy(0, {distance})")
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(0.4)
+
+
+def format_rating_out_of_5(raw_rating: Optional[str]) -> Optional[str]:
+    """Standardize rating string to 'X.X out of 5 stars' format for all platforms."""
+    if not raw_rating or raw_rating == "N/A":
+        return None
+    import re
+    match = re.search(r"([0-5](?:\.[0-9])?)", raw_rating)
+    if match:
+        val = match.group(1)
+        if "." not in val:
+            val = f"{val}.0"
+        return f"{val} out of 5 stars"
+    return None
 
 
 async def safe_text(element: ElementHandle, selector: str, fallback: Optional[str] = None) -> Optional[str]:

@@ -262,35 +262,28 @@ export default function BrowserPanel() {
               </div>
             )}
 
-            {/* Product grid */}
+            {/* Product grid — 4 clean items only: Image, Title, Price, Rating */}
             {products.length > 0 && (
               <div className="product-grid">
                 {products.map((product, idx) => (
                   <div key={idx} className="product-card">
-                    {product.image_url && (
+                    {product.image_url ? (
                       <div className="product-image">
                         <img src={product.image_url} alt={product.title} loading="lazy" />
                       </div>
+                    ) : (
+                      <div className="product-image placeholder">
+                        <span>No Image</span>
+                      </div>
                     )}
                     <div className="product-info">
-                      <h4 className="product-title">{product.title}</h4>
+                      <h4 className="product-title" title={product.title}>{product.title}</h4>
                       <div className="product-meta">
                         <span className="product-price">{product.price}</span>
-                        {product.rating && (
+                        {product.rating ? (
                           <span className="product-rating">⭐ {product.rating}</span>
-                        )}
-                      </div>
-                      {product.rating_count && (
-                        <span className="product-ratings-count">{product.rating_count}</span>
-                      )}
-                      <div className="product-footer">
-                        <span className={`source-badge ${product.source.toLowerCase()}`}>
-                          {product.source}
-                        </span>
-                        {product.url && (
-                          <a href={product.url} target="_blank" rel="noopener noreferrer" className="product-link">
-                            View →
-                          </a>
+                        ) : (
+                          <span className="product-rating muted">⭐ N/A</span>
                         )}
                       </div>
                     </div>
@@ -317,19 +310,35 @@ export default function BrowserPanel() {
         )}
       </div>
 
-      {/* Screenshot modal */}
+      {/* Screenshot modal with exit button */}
       {showScreenshot && screenshot && (
         <div className="screenshot-overlay" onClick={() => setShowScreenshot(false)}>
           <div className="screenshot-modal" onClick={(e) => e.stopPropagation()}>
             <div className="screenshot-header">
-              <span>Browser Screenshot</span>
-              <button className="screenshot-close" onClick={() => setShowScreenshot(false)}>✕</button>
+              <span className="modal-title">Live Browser Viewport</span>
+              <button
+                className="btn-back-to-search"
+                onClick={() => setShowScreenshot(false)}
+                title="Return to search dashboard"
+              >
+                ← Back to Search
+              </button>
             </div>
-            <img
-              src={`data:image/png;base64,${screenshot}`}
-              alt="Browser screenshot"
-              className="screenshot-img"
-            />
+            <div className="screenshot-body">
+              <img
+                src={`data:image/png;base64,${screenshot}`}
+                alt="Browser screenshot"
+                className="screenshot-img"
+              />
+            </div>
+            <div className="screenshot-footer">
+              <button
+                className="btn-back-to-search-large"
+                onClick={() => setShowScreenshot(false)}
+              >
+                ← Exit View & Return to Search
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -10,12 +10,12 @@ from typing import List
 
 from app.models.schemas import ProductItem
 from app.services.browser.browser_manager import browser_manager
-from app.services.browser.base_scraper import smooth_scroll, safe_text, safe_attribute
+from app.services.browser.base_scraper import smooth_scroll, safe_text, safe_attribute, format_rating_out_of_5
 
 AMAZON_SEARCH_URL = "https://www.amazon.in/s?k={query}"
 
 
-async def search_amazon(query: str, max_results: int = 10) -> List[ProductItem]:
+async def search_amazon(query: str, max_results: int = 50) -> List[ProductItem]:
     """
     Search Amazon.in for a query and return structured product results.
 
@@ -32,7 +32,7 @@ async def search_amazon(query: str, max_results: int = 10) -> List[ProductItem]:
     url = AMAZON_SEARCH_URL.format(query=encoded)
 
     await page.goto(url, wait_until="domcontentloaded", timeout=30000)
-    await smooth_scroll(page, scrolls=4, distance=700)
+    await smooth_scroll(page, scrolls=6, distance=700)
 
     products: List[ProductItem] = []
 
@@ -59,12 +59,14 @@ async def search_amazon(query: str, max_results: int = 10) -> List[ProductItem]:
                     price = "N/A"
 
             # Rating
-            rating = await safe_attribute(card, "span.a-icon-alt", "textContent")
-            if not rating:
+            raw_rating = await safe_attribute(card, "span.a-icon-alt", "textContent")
+            if not raw_rating:
                 icon = await card.query_selector("span.a-icon-alt")
                 if icon:
-                    rating = await icon.text_content()
-                    rating = rating.strip() if rating else None
+                    raw_rating = await icon.text_content()
+                    raw_rating = raw_rating.strip() if raw_rating else None
+
+            rating = format_rating_out_of_5(raw_rating)
 
             # Rating count
             rating_count = await safe_text(card, "span.a-size-base.s-underline-text")

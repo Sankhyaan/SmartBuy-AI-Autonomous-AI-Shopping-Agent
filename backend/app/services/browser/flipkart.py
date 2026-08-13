@@ -10,12 +10,12 @@ from typing import List
 
 from app.models.schemas import ProductItem
 from app.services.browser.browser_manager import browser_manager
-from app.services.browser.base_scraper import smooth_scroll, safe_text, safe_attribute
+from app.services.browser.base_scraper import smooth_scroll, safe_text, safe_attribute, format_rating_out_of_5
 
 FLIPKART_SEARCH_URL = "https://www.flipkart.com/search?q={query}"
 
 
-async def search_flipkart(query: str, max_results: int = 10) -> List[ProductItem]:
+async def search_flipkart(query: str, max_results: int = 50) -> List[ProductItem]:
     """
     Search Flipkart for a query and return structured product results.
 
@@ -41,7 +41,7 @@ async def search_flipkart(query: str, max_results: int = 10) -> List[ProductItem
     except Exception:
         pass
 
-    await smooth_scroll(page, scrolls=4, distance=700)
+    await smooth_scroll(page, scrolls=6, distance=700)
 
     products: List[ProductItem] = []
 
@@ -135,7 +135,7 @@ async def search_flipkart(query: str, max_results: int = 10) -> List[ProductItem
         products.append(ProductItem(
             title=item.get('title'),
             price=item.get('price'),
-            rating=item.get('rating'),
+            rating=format_rating_out_of_5(item.get('rating')),
             rating_count=item.get('rating_count'),
             url=item.get('url'),
             image_url=item.get('image_url'),

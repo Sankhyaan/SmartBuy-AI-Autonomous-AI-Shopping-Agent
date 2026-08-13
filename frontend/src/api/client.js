@@ -34,9 +34,9 @@ export const browserAPI = {
   scroll: (direction = "down", amount = 500) =>
     apiClient.post("/browser/scroll", { direction, amount }),
 
-  searchAmazon: (query, max_results = 10) =>
+  searchAmazon: (query, max_results = 50) =>
     apiClient.post("/browser/amazon/search", { query: query.trim(), max_results }),
 
-  searchFlipkart: (query, max_results = 10) =>
+  searchFlipkart: (query, max_results = 50) =>
     apiClient.post("/browser/flipkart/search", { query: query.trim(), max_results }),
 };
