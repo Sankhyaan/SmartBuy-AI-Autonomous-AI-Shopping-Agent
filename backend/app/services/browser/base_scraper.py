@@ -86,6 +86,33 @@ def clean_rating_count(raw_count: Optional[str]) -> Optional[str]:
     return None
 
 
+def parse_count_numeric_value(count_str: Optional[str]) -> float:
+    """Convert cleaned count string ('13,311', '2,25,115', '4.3K') into numeric float value for max comparison."""
+    if not count_str:
+        return 0.0
+    s = count_str.upper().replace(",", "").strip()
+    if s.endswith("K"):
+        try:
+            return float(s[:-1]) * 1000.0
+        except ValueError:
+            return 0.0
+    elif s.endswith("M"):
+        try:
+            return float(s[:-1]) * 1000000.0
+        except ValueError:
+            return 0.0
+    elif s.endswith("B"):
+        try:
+            return float(s[:-1]) * 1000000000.0
+        except ValueError:
+            return 0.0
+    else:
+        try:
+            return float(s)
+        except ValueError:
+            return 0.0
+
+
 def clean_bought_past_month(raw_text: Optional[str]) -> Optional[str]:
     """Extract and standardize 'X+ bought in past month' pattern."""
     if not raw_text:

@@ -12,7 +12,8 @@ from app.models.schemas import ProductItem
 from app.services.browser.browser_manager import browser_manager
 from app.services.browser.base_scraper import (
     smooth_scroll, safe_text, safe_attribute,
-    format_rating_out_of_5, clean_rating_count, clean_bought_past_month
+    format_rating_out_of_5, clean_rating_count, clean_bought_past_month,
+    parse_count_numeric_value
 )
 
 AMAZON_SEARCH_URL = "https://www.amazon.in/s?k={query}"
@@ -71,10 +72,11 @@ async def search_amazon(query: str, max_results: int = 50) -> List[ProductItem]:
 
             rating = format_rating_out_of_5(raw_rating)
 
-            # Rating count (e.g. (1,077) or 11,828)
-            rating_count = None
+            # Rating count (e.g. (13,311) or 11,828)
+            rc_candidates = []
             rating_count_selectors = [
                 "a[href*='#customerReviews'] span",
+                "a[href*='customerReviews']",
                 "span.a-size-base.s-underline-text",
                 "div.a-row.a-size-small a span.a-size-base",
                 "div.a-row.a-size-small span.a-size-base",
@@ -87,8 +89,10 @@ async def search_amazon(query: str, max_results: int = 50) -> List[ProductItem]:
                 if raw_rc:
                     cleaned_rc = clean_rating_count(raw_rc)
                     if cleaned_rc:
-                        rating_count = cleaned_rc
-                        break
+                        rc_candidates.append(cleaned_rc)
+
+            # Select the candidate with the highest numeric review count (e.g. 13,311 over 13)
+            rating_count = max(rc_candidates, key=parse_count_numeric_value) if rc_candidates else None
 
             # Bought in past month
             card_full_text = await card.text_content()
