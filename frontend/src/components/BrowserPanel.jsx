@@ -267,17 +267,33 @@ export default function BrowserPanel() {
               <div className="product-grid">
                 {products.map((product, idx) => (
                   <div key={idx} className="product-card">
-                    {product.image_url ? (
-                      <div className="product-image">
-                        <img src={product.image_url} alt={product.title} loading="lazy" />
-                      </div>
+                    {product.url ? (
+                      <a href={product.url} target="_blank" rel="noopener noreferrer" className="product-image-link">
+                        {product.image_url ? (
+                          <div className="product-image">
+                            <img src={product.image_url} alt={product.title} loading="lazy" />
+                          </div>
+                        ) : (
+                          <div className="product-image placeholder">
+                            <span>No Image</span>
+                          </div>
+                        )}
+                      </a>
                     ) : (
-                      <div className="product-image placeholder">
-                        <span>No Image</span>
-                      </div>
+                      product.image_url && (
+                        <div className="product-image">
+                          <img src={product.image_url} alt={product.title} loading="lazy" />
+                        </div>
+                      )
                     )}
                     <div className="product-info">
-                      <h4 className="product-title" title={product.title}>{product.title}</h4>
+                      {product.url ? (
+                        <a href={product.url} target="_blank" rel="noopener noreferrer" className="product-title-link">
+                          <h4 className="product-title" title={product.title}>{product.title}</h4>
+                        </a>
+                      ) : (
+                        <h4 className="product-title" title={product.title}>{product.title}</h4>
+                      )}
                       <div className="product-meta">
                         <span className="product-price">{product.price}</span>
                         {product.rating ? (
@@ -292,6 +308,13 @@ export default function BrowserPanel() {
                       {product.bought_past_month && (
                         <div className="product-bought">
                           🔥 {product.bought_past_month}
+                        </div>
+                      )}
+                      {product.url && (
+                        <div className="product-footer">
+                          <a href={product.url} target="_blank" rel="noopener noreferrer" className="product-link">
+                            View Product →
+                          </a>
                         </div>
                       )}
                     </div>

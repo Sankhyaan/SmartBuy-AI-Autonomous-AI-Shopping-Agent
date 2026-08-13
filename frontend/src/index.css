@@ -827,6 +827,20 @@ html, body, #root {
   color: #22c55e;
 }
 
+.product-image-link {
+  display: block;
+  text-decoration: none;
+}
+
+.product-title-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.product-title-link:hover .product-title {
+  color: var(--accent);
+}
+
 .product-rating {
   font-size: 11px;
   color: #fbbf24;
@@ -849,10 +863,22 @@ html, body, #root {
 .product-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   margin-top: auto;
   padding-top: 6px;
   border-top: 1px solid var(--border);
+}
+
+.product-link {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.product-link:hover {
+  text-decoration: underline;
 }
 
 .source-badge {

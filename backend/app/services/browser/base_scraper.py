@@ -48,15 +48,31 @@ def format_rating_out_of_5(raw_rating: Optional[str]) -> Optional[str]:
 
 
 def clean_rating_count(raw_count: Optional[str]) -> Optional[str]:
-    """Clean and strip parentheses/words from rating count e.g. '(1,234)' -> '1,234', '(41.9K)' -> '41.9K'."""
+    """
+    Clean and strip parentheses/words from rating count.
+    Only returns valid integer counts like '1,234', '4.3K', '41.9K', '637'.
+    Rejects unit prices like '₹63.97 / 100g' or decimal numbers.
+    """
     if not raw_count:
         return None
+    
+    # Reject unit prices or non-review text containing currency symbols or per-unit indicators
+    raw_lower = raw_count.lower()
+    if any(char in raw_lower for char in ["₹", "$", "/", "per", "count", "gram", "100g", "pack", "item", "unit"]):
+        return None
+        
     import re
     cleaned = raw_count.replace("(", "").replace(")", "").strip()
-    match = re.search(r"([0-9,]+(?:\.[0-9]+)?[KMBkmb]?)", cleaned)
+    
+    # Matches integer counts (e.g. 1,234 or 637) or abbreviation counts (e.g. 4.3K or 41.9K)
+    match = re.search(r"\b([0-9]{1,3}(?:,[0-9]{3})+|[0-9]+(?:\.[0-9])?[KMBkmb]|[0-9]+)\b", cleaned)
     if match:
-        return match.group(1).upper()
-    return cleaned if cleaned else None
+        val = match.group(1).upper()
+        # Reject raw floats like 63.97 or 25.44 that lack K/M/B suffix
+        if "." in val and not any(char in val for char in ["K", "M", "B"]):
+            return None
+        return val
+    return None
 
 
 def clean_bought_past_month(raw_text: Optional[str]) -> Optional[str]:
