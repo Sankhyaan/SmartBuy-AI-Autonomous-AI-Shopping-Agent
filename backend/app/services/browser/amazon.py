@@ -73,6 +73,7 @@ async def search_amazon(query: str, max_results: int = 50) -> List[ProductItem]:
             rating = format_rating_out_of_5(raw_rating)
 
             # Rating count (e.g. (13.3K) or 13,311 or 11,828)
+            card_full_text = await card.text_content() or ""
             rc_candidates = []
             rating_count_selectors = [
                 "a[href*='#customerReviews'] span",
