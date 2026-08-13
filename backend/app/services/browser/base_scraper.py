@@ -92,7 +92,7 @@ def clean_rating_count(raw_count: Optional[str]) -> Optional[str]:
 
 
 def parse_count_numeric_value(count_str: Optional[str]) -> float:
-    """Convert cleaned count string ('13,311', '2,25,115', '4.3K') into numeric float value for max comparison."""
+    """Convert cleaned count string ('13,311', '2,25,115', '4.3K') into numeric float value for comparison."""
     if not count_str:
         return 0.0
     s = count_str.upper().replace(",", "").strip()
@@ -116,6 +116,19 @@ def parse_count_numeric_value(count_str: Optional[str]) -> float:
             return float(s)
         except ValueError:
             return 0.0
+
+
+def rating_count_priority_key(count_str: Optional[str]) -> tuple:
+    """
+    Returns a sorting key (is_exact_full_number, numeric_value) for candidate rating counts.
+    Prioritizes exact un-abbreviated full numbers like '13,311' or '2,25,115' over '13.3K'.
+    """
+    if not count_str:
+        return (False, 0.0)
+    
+    val = parse_count_numeric_value(count_str)
+    is_exact = not any(char in count_str.upper() for char in ["K", "M", "B"])
+    return (is_exact, val)
 
 
 def clean_bought_past_month(raw_text: Optional[str]) -> Optional[str]:

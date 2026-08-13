@@ -13,7 +13,7 @@ from app.services.browser.browser_manager import browser_manager
 from app.services.browser.base_scraper import (
     smooth_scroll, safe_text, safe_attribute,
     format_rating_out_of_5, clean_rating_count, clean_bought_past_month,
-    parse_count_numeric_value
+    parse_count_numeric_value, rating_count_priority_key
 )
 
 AMAZON_SEARCH_URL = "https://www.amazon.in/s?k={query}"
@@ -93,8 +93,8 @@ async def search_amazon(query: str, max_results: int = 50) -> List[ProductItem]:
                 except Exception:
                     pass
 
-            # Select candidate with the highest numeric review count (e.g. 13.3K over 13)
-            rating_count = max(rc_candidates, key=parse_count_numeric_value) if rc_candidates else None
+            # Select candidate with highest priority (prefers exact full numbers like 13,311 over 13.3K)
+            rating_count = max(rc_candidates, key=rating_count_priority_key) if rc_candidates else None
 
             # Bought in past month
             bought_past_month = clean_bought_past_month(card_full_text)
