@@ -93,17 +93,17 @@ async def search_flipkart(query: str, max_results: int = 50) -> List[ProductItem
             let rating = '';
             let ratingCount = '';
             
-            // Try to find a combined rating line like "3.9(11,828)" or "4.5★"
-            const ratingLine = texts.find(t => t.match(/^[0-9](\.[0-9])?\([0-9,]+\)$/) || t.includes('★'));
+            // Try to find a combined rating line like "4.2(2,25,115)" or "4.5★" or "4.2 (2,25,115)"
+            const ratingLine = texts.find(t => t.match(/[0-9]\.[0-9].*\([0-9,]+\)/) || t.includes('★') || t.match(/^[0-9]\.[0-9]$/));
             
             if (ratingLine) {{
-                // If it matches 3.9(11,828)
-                const match = ratingLine.match(/^([0-9](\.[0-9])?)\(([0-9,]+)\)$/);
+                // Non-capturing group for decimal ensures match[1] = rating, match[2] = ratingCount
+                const match = ratingLine.match(/([0-9](?:\\.[0-9])?)\\s*\\(([0-9,]+)\\)/);
                 if (match) {{
                     rating = match[1];
-                    ratingCount = match[3];
+                    ratingCount = match[2];
                 }} else {{
-                    // It has a star, so it might just be the rating
+                    // It has a star or rating alone
                     rating = ratingLine.replace('★', '').trim();
                 }}
             }}

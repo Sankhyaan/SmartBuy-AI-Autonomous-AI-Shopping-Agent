@@ -50,8 +50,8 @@ def format_rating_out_of_5(raw_rating: Optional[str]) -> Optional[str]:
 def clean_rating_count(raw_count: Optional[str]) -> Optional[str]:
     """
     Clean and strip parentheses/words from rating count.
-    Only returns valid integer counts like '1,077', '1,234', '4.3K', '41.9K', '637'.
-    Rejects unit prices like '₹63.97 / 100g' or decimal numbers.
+    Supports Indian numbering format (e.g. '2,25,115'), Western (e.g. '225,115'), and abbreviations ('4.3K').
+    Rejects unit prices like '₹63.97 / 100g' or decimal floats.
     """
     if not raw_count:
         return None
@@ -63,17 +63,19 @@ def clean_rating_count(raw_count: Optional[str]) -> Optional[str]:
         return None
         
     import re
-    # Extract numbers inside parentheses first if present e.g. "(1,077)" -> "1,077"
+    # Extract numbers inside parentheses first if present e.g. "(2,25,115)" -> "2,25,115"
     paren_match = re.search(r"\(([0-9,]+(?:\.[0-9]+)?[KMBkmb]?)\)", raw_count)
     if paren_match:
         cleaned = paren_match.group(1).strip()
     else:
-        cleaned = raw_count.replace("(", "").replace(")", "").replace("ratings", "").replace("rating", "").replace("reviews", "").strip()
+        # Strip descriptive words e.g. "based on 2,25,115 ratings by Verified Buyers"
+        cleaned = re.sub(r"(?i)\b(based|on|ratings|rating|reviews|verified|buyers)\b", "", raw_count)
+        cleaned = cleaned.replace("(", "").replace(")", "").strip()
     
-    # Matches integer counts (e.g. 1,077 or 11,828 or 4.3K or 637)
-    match = re.search(r"\b([0-9]{1,3}(?:,[0-9]{3})+|[0-9]+(?:\.[0-9])?[KMBkmb]|[0-9]+)\b", cleaned)
+    # Matches numbers with commas (supports Indian format like 2,25,115 and Western like 225,115) or K/M abbreviations
+    match = re.search(r"([0-9][0-9,]*[0-9]|[0-9]+(?:\.[0-9])?[KMBkmb]|[0-9]+)", cleaned)
     if match:
-        val = match.group(1).upper()
+        val = match.group(1).strip().upper()
         # Reject raw floats like 63.97 or 25.44 that lack K/M/B suffix
         if "." in val and not any(char in val for char in ["K", "M", "B"]):
             return None
