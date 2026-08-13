@@ -126,9 +126,14 @@ async def search_flipkart(query: str, max_results: int = 50) -> List[ProductItem
                 }}
             }}
 
-            // Fallback for ratingCount: check for standalone count or "6 ratings"
+            // Fallback for ratingCount: check for "based on 33,365 ratings" or "(33,365)" or "33,365 ratings"
             if (!ratingCount) {{
                 for (const t of texts) {{
+                    const basedOnMatch = t.match(/(?:based\\s+on\\s+)?([0-9][0-9,]*[0-9]|[0-9]+)\\s*ratings/i);
+                    if (basedOnMatch) {{
+                        ratingCount = basedOnMatch[1];
+                        break;
+                    }}
                     const parenMatch = t.match(/\\(([0-9,]+(?:\\.[0-9]+)?[KMBkmb]?)\\)/);
                     if (parenMatch) {{
                         ratingCount = parenMatch[1];

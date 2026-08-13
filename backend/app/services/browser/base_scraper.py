@@ -50,7 +50,8 @@ def format_rating_out_of_5(raw_rating: Optional[str]) -> Optional[str]:
 def clean_rating_count(raw_count: Optional[str]) -> Optional[str]:
     """
     Clean and strip parentheses/words from rating count.
-    Supports Indian numbering format (e.g. '2,25,115'), Western (e.g. '225,115'), and abbreviations ('4.3K').
+    Supports Indian numbering format (e.g. '33,365', '2,25,115'), Western (e.g. '225,115'), and abbreviations ('4.3K').
+    Handles 'based on 33,365 ratings by Verified Buyers'.
     Rejects unit prices like '₹63.97 / 100g' or decimal floats.
     """
     if not raw_count:
@@ -63,20 +64,22 @@ def clean_rating_count(raw_count: Optional[str]) -> Optional[str]:
         return None
         
     import re
-    # Extract numbers inside parentheses first if present e.g. "(2,25,115)" -> "2,25,115"
+    # Explicitly match "based on 33,365 ratings" or "33,365 ratings" pattern
+    ratings_pattern_match = re.search(r"(?:based\s+on\s+)?([0-9][0-9,]*[0-9]|[0-9]+)\s*ratings", raw_count, re.IGNORECASE)
+    if ratings_pattern_match:
+        return ratings_pattern_match.group(1).strip()
+
+    # Extract numbers inside parentheses first if present e.g. "(33,365)" -> "33,365"
     paren_match = re.search(r"\(([0-9,]+(?:\.[0-9]+)?[KMBkmb]?)\)", raw_count)
     if paren_match:
         cleaned = paren_match.group(1).strip()
     else:
-        # Strip descriptive words e.g. "based on 2,25,115 ratings by Verified Buyers"
         cleaned = re.sub(r"(?i)\b(based|on|ratings|rating|reviews|verified|buyers)\b", "", raw_count)
         cleaned = cleaned.replace("(", "").replace(")", "").strip()
     
-    # Matches numbers with commas (supports Indian format like 2,25,115 and Western like 225,115) or K/M abbreviations
     match = re.search(r"([0-9][0-9,]*[0-9]|[0-9]+(?:\.[0-9])?[KMBkmb]|[0-9]+)", cleaned)
     if match:
         val = match.group(1).strip().upper()
-        # Reject raw floats like 63.97 or 25.44 that lack K/M/B suffix
         if "." in val and not any(char in val for char in ["K", "M", "B"]):
             return None
         return val
