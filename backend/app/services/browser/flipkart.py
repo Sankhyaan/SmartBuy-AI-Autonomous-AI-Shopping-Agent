@@ -89,31 +89,54 @@ async def search_flipkart(query: str, max_results: int = 50) -> List[ProductItem
                 price = match ? match[0] : priceStr;
             }}
             
-            // Rating usually has ★ or matches a pattern like 3.9(11,828)
+            // Robust Rating and Rating Count Extraction for all Flipkart layout variations
             let rating = '';
             let ratingCount = '';
-            
-            // Try to find a combined rating line like "4.2(2,25,115)" or "4.5★" or "4.2 (2,25,115)"
-            const ratingLine = texts.find(t => t.match(/[0-9]\.[0-9].*\([0-9,]+\)/) || t.includes('★') || t.match(/^[0-9]\.[0-9]$/));
-            
-            if (ratingLine) {{
-                // Non-capturing group for decimal ensures match[1] = rating, match[2] = ratingCount
-                const match = ratingLine.match(/([0-9](?:\\.[0-9])?)\\s*\\(([0-9,]+)\\)/);
-                if (match) {{
-                    rating = match[1];
-                    ratingCount = match[2];
-                }} else {{
-                    // It has a star or rating alone
-                    rating = ratingLine.replace('★', '').trim();
+
+            for (const t of texts) {{
+                // Pipe format: "2★ | 6" or "2 ★ | 6" or "4.2 ★ | 2,25,115"
+                const pipeMatch = t.match(/^([0-5](?:\\.[0-9])?)\\s*★?\\s*\\|\\s*([0-9,]+)/i);
+                if (pipeMatch) {{
+                    rating = pipeMatch[1];
+                    ratingCount = pipeMatch[2];
+                    break;
+                }}
+
+                // Parentheses format: "4.2★ (2,25,115)" or "2(6)" or "4.2 (2,25,115)"
+                const parenMatch = t.match(/^([0-5](?:\\.[0-9])?)\\s*★?\\s*\\(([0-9,]+)\\)/i);
+                if (parenMatch) {{
+                    rating = parenMatch[1];
+                    ratingCount = parenMatch[2];
+                    break;
+                }}
+
+                // Star format: "2★" or "4.2★" or "2 ★"
+                const starMatch = t.match(/^([0-5](?:\\.[0-9])?)\\s*★/i);
+                if (starMatch && !rating) {{
+                    rating = starMatch[1];
                 }}
             }}
-            
-            // If ratingCount wasn't found in the combined line, try finding any parentheses review count "(1,077)"
+
+            // Fallback: If rating wasn't found in loop, check for rating element or text matching single digit rating e.g. "2"
+            if (!rating) {{
+                const starText = texts.find(t => t.includes('★') || t.match(/^[0-5](\\.[0-9])?$/));
+                if (starText) {{
+                    const m = starText.match(/([0-5](?:\\.[0-9])?)/);
+                    if (m) rating = m[1];
+                }}
+            }}
+
+            // Fallback for ratingCount: check for standalone count or "6 ratings"
             if (!ratingCount) {{
                 for (const t of texts) {{
                     const parenMatch = t.match(/\\(([0-9,]+(?:\\.[0-9]+)?[KMBkmb]?)\\)/);
                     if (parenMatch) {{
                         ratingCount = parenMatch[1];
+                        break;
+                    }}
+                    const countMatch = t.match(/\\b([0-9][0-9,]*[0-9]|[0-9]+)\\s*ratings\\b/i);
+                    if (countMatch && countMatch[1] !== rating) {{
+                        ratingCount = countMatch[1];
                         break;
                     }}
                 }}
