@@ -71,11 +71,24 @@ async def search_amazon(query: str, max_results: int = 50) -> List[ProductItem]:
 
             rating = format_rating_out_of_5(raw_rating)
 
-            # Rating count
-            raw_rating_count = await safe_text(card, "span.a-size-base.s-underline-text")
-            if not raw_rating_count:
-                raw_rating_count = await safe_text(card, "a > span.a-size-base")
-            rating_count = clean_rating_count(raw_rating_count)
+            # Rating count (e.g. (1,077) or 11,828)
+            rating_count = None
+            rating_count_selectors = [
+                "a[href*='#customerReviews'] span",
+                "span.a-size-base.s-underline-text",
+                "div.a-row.a-size-small a span.a-size-base",
+                "div.a-row.a-size-small span.a-size-base",
+                "a.a-link-normal span.a-size-base",
+                "a.s-underline-text span.a-size-base",
+                "a > span.a-size-base"
+            ]
+            for sel in rating_count_selectors:
+                raw_rc = await safe_text(card, sel)
+                if raw_rc:
+                    cleaned_rc = clean_rating_count(raw_rc)
+                    if cleaned_rc:
+                        rating_count = cleaned_rc
+                        break
 
             # Bought in past month
             card_full_text = await card.text_content()

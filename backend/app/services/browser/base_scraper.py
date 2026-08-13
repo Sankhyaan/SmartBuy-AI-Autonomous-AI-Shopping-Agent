@@ -50,21 +50,27 @@ def format_rating_out_of_5(raw_rating: Optional[str]) -> Optional[str]:
 def clean_rating_count(raw_count: Optional[str]) -> Optional[str]:
     """
     Clean and strip parentheses/words from rating count.
-    Only returns valid integer counts like '1,234', '4.3K', '41.9K', '637'.
+    Only returns valid integer counts like '1,077', '1,234', '4.3K', '41.9K', '637'.
     Rejects unit prices like '₹63.97 / 100g' or decimal numbers.
     """
     if not raw_count:
         return None
     
+    raw_lower = raw_count.lower().strip()
+    
     # Reject unit prices or non-review text containing currency symbols or per-unit indicators
-    raw_lower = raw_count.lower()
-    if any(char in raw_lower for char in ["₹", "$", "/", "per", "count", "gram", "100g", "pack", "item", "unit"]):
+    if "₹" in raw_lower or "$" in raw_lower or "/" in raw_lower or "100g" in raw_lower or "per " in raw_lower:
         return None
         
     import re
-    cleaned = raw_count.replace("(", "").replace(")", "").strip()
+    # Extract numbers inside parentheses first if present e.g. "(1,077)" -> "1,077"
+    paren_match = re.search(r"\(([0-9,]+(?:\.[0-9]+)?[KMBkmb]?)\)", raw_count)
+    if paren_match:
+        cleaned = paren_match.group(1).strip()
+    else:
+        cleaned = raw_count.replace("(", "").replace(")", "").replace("ratings", "").replace("rating", "").replace("reviews", "").strip()
     
-    # Matches integer counts (e.g. 1,234 or 637) or abbreviation counts (e.g. 4.3K or 41.9K)
+    # Matches integer counts (e.g. 1,077 or 11,828 or 4.3K or 637)
     match = re.search(r"\b([0-9]{1,3}(?:,[0-9]{3})+|[0-9]+(?:\.[0-9])?[KMBkmb]|[0-9]+)\b", cleaned)
     if match:
         val = match.group(1).upper()

@@ -108,11 +108,14 @@ async def search_flipkart(query: str, max_results: int = 50) -> List[ProductItem
                 }}
             }}
             
-            // If ratingCount wasn't found in the combined line, try finding it standalone "(11,828)"
+            // If ratingCount wasn't found in the combined line, try finding any parentheses review count "(1,077)"
             if (!ratingCount) {{
-                const ratingCountLine = texts.find(t => t.startsWith('(') && t.endsWith(')') && /[0-9]/.test(t));
-                if (ratingCountLine) {{
-                    ratingCount = ratingCountLine.replace(/[()]/g, '');
+                for (const t of texts) {{
+                    const parenMatch = t.match(/\\(([0-9,]+(?:\\.[0-9]+)?[KMBkmb]?)\\)/);
+                    if (parenMatch) {{
+                        ratingCount = parenMatch[1];
+                        break;
+                    }}
                 }}
             }}
             
