@@ -72,19 +72,13 @@ async def search_amazon(query: str, max_results: int = 50) -> List[ProductItem]:
 
             rating = format_rating_out_of_5(raw_rating)
 
-            # Rating count (e.g. (13,311) or 11,828)
-            card_full_text = await card.text_content() or ""
+            # Rating count (e.g. (13.3K) or 13,311 or 11,828)
             rc_candidates = []
-
-            # 1. Extract from all matching DOM elements in card (scans all spans, not just first)
             rating_count_selectors = [
                 "a[href*='#customerReviews'] span",
                 "a[href*='customerReviews']",
-                "span.a-size-base.s-underline-text",
                 "span.s-underline-text",
-                "div.a-row.a-size-small a span",
-                "div.a-row.a-size-small span",
-                "a.a-link-normal span.a-size-base",
+                "span.a-size-base.s-underline-text",
                 "a.s-underline-text"
             ]
             for sel in rating_count_selectors:
@@ -99,21 +93,7 @@ async def search_amazon(query: str, max_results: int = 50) -> List[ProductItem]:
                 except Exception:
                     pass
 
-            # 2. Extract from card full text using regex as additional fallback candidates
-            import re
-            paren_matches = re.findall(r"\(([0-9,]+(?:\.[0-9]+)?[KMBkmb]?)\)", card_full_text)
-            for pm in paren_matches:
-                cleaned_pm = clean_rating_count(pm)
-                if cleaned_pm:
-                    rc_candidates.append(cleaned_pm)
-
-            formatted_comma_matches = re.findall(r"\b([0-9]{1,3}(?:,[0-9]{3})+|[0-9]{1,2}(?:,[0-9]{2})+)\b", card_full_text)
-            for fcm in formatted_comma_matches:
-                cleaned_fcm = clean_rating_count(fcm)
-                if cleaned_fcm:
-                    rc_candidates.append(cleaned_fcm)
-
-            # Select candidate with the highest numeric review count (e.g. 13,311 over 13)
+            # Select candidate with the highest numeric review count (e.g. 13.3K over 13)
             rating_count = max(rc_candidates, key=parse_count_numeric_value) if rc_candidates else None
 
             # Bought in past month

@@ -50,26 +50,29 @@ def format_rating_out_of_5(raw_rating: Optional[str]) -> Optional[str]:
 def clean_rating_count(raw_count: Optional[str]) -> Optional[str]:
     """
     Clean and strip parentheses/words from rating count.
-    Supports Indian numbering format (e.g. '33,365', '2,25,115'), Western (e.g. '225,115'), and abbreviations ('4.3K').
+    Supports Indian numbering format (e.g. '33,365', '2,25,115'), Western (e.g. '225,115'), and abbreviations ('13.3K', '4.3K').
     Handles 'based on 33,365 ratings by Verified Buyers'.
-    Rejects unit prices like '₹63.97 / 100g' or decimal floats.
+    Rejects unit prices like '₹63.97 / 100g' or decimal floats without K/M/B suffix.
     """
     if not raw_count:
         return None
     
     raw_lower = raw_count.lower().strip()
     
-    # Reject unit prices or non-review text containing currency symbols or per-unit indicators
-    if "₹" in raw_lower or "$" in raw_lower or "/" in raw_lower or "100g" in raw_lower or "per " in raw_lower:
+    # Reject unit prices or non-review text containing currency symbols or per-unit indicators or bought text
+    if any(k in raw_lower for k in ["₹", "$", "/", "100g", "per ", "off", "bought", "m.r.p", "delivery"]):
         return None
         
     import re
     # Explicitly match "based on 33,365 ratings" or "33,365 ratings" pattern
-    ratings_pattern_match = re.search(r"(?:based\s+on\s+)?([0-9][0-9,]*[0-9]|[0-9]+)\s*ratings", raw_count, re.IGNORECASE)
+    ratings_pattern_match = re.search(r"(?:based\s+on\s+)?([0-9][0-9,]*[0-9]|[0-9]+(?:\.[0-9]+)?[KMBkmb]?)\s*ratings", raw_count, re.IGNORECASE)
     if ratings_pattern_match:
-        return ratings_pattern_match.group(1).strip()
+        val = ratings_pattern_match.group(1).strip().upper()
+        if "." in val and not any(char in val for char in ["K", "M", "B"]):
+            return None
+        return val
 
-    # Extract numbers inside parentheses first if present e.g. "(33,365)" -> "33,365"
+    # Extract numbers inside parentheses first if present e.g. "(13.3K)" -> "13.3K"
     paren_match = re.search(r"\(([0-9,]+(?:\.[0-9]+)?[KMBkmb]?)\)", raw_count)
     if paren_match:
         cleaned = paren_match.group(1).strip()
@@ -77,9 +80,11 @@ def clean_rating_count(raw_count: Optional[str]) -> Optional[str]:
         cleaned = re.sub(r"(?i)\b(based|on|ratings|rating|reviews|verified|buyers)\b", "", raw_count)
         cleaned = cleaned.replace("(", "").replace(")", "").strip()
     
-    match = re.search(r"([0-9][0-9,]*[0-9]|[0-9]+(?:\.[0-9])?[KMBkmb]|[0-9]+)", cleaned)
+    # Match K/M/B suffix numbers FIRST, then comma-separated numbers, then integers
+    match = re.search(r"([0-9]+(?:\.[0-9]+)?[KMBkmb]|[0-9][0-9,]*[0-9]|[0-9]+)", cleaned)
     if match:
         val = match.group(1).strip().upper()
+        # Reject raw floats like 63.97 or 25.44 that lack K/M/B suffix
         if "." in val and not any(char in val for char in ["K", "M", "B"]):
             return None
         return val
