@@ -669,8 +669,6 @@ html, body, #root {
 .search-clear-btn:hover {
   color: var(--text-primary);
 }
-  transition: var(--transition);
-}
 
 .search-input:focus {
   outline: none;
