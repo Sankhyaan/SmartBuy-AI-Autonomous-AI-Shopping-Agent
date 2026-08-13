@@ -83,7 +83,15 @@ async def search_amazon(query: str, max_results: int = 50) -> List[ProductItem]:
 
             # URL
             link = await safe_attribute(card, "h2 a.a-link-normal", "href")
-            product_url = f"https://www.amazon.in{link}" if link and link.startswith("/") else link or ""
+            if not link:
+                link = await safe_attribute(card, "a.a-link-normal", "href")
+            if not link:
+                link = await safe_attribute(card, "a[href*='/dp/']", "href")
+
+            if link:
+                product_url = f"https://www.amazon.in{link}" if link.startswith("/") else link
+            else:
+                product_url = f"https://www.amazon.in/s?k={urllib.parse.quote_plus(title)}"
 
             # Image
             image_url = await safe_attribute(card, "img.s-image", "src")

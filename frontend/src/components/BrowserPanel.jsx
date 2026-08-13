@@ -310,13 +310,16 @@ export default function BrowserPanel() {
                           🔥 {product.bought_past_month}
                         </div>
                       )}
-                      {product.url && (
-                        <div className="product-footer">
-                          <a href={product.url} target="_blank" rel="noopener noreferrer" className="product-link">
-                            View Product →
-                          </a>
-                        </div>
-                      )}
+                      <div className="product-footer">
+                        <a
+                          href={product.url || "#"}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="product-link"
+                        >
+                          View Product →
+                        </a>
+                      </div>
                     </div>
                   </div>
                 ))}

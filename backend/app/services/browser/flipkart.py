@@ -136,15 +136,19 @@ async def search_flipkart(query: str, max_results: int = 50) -> List[ProductItem
     }}''', max_results)
     
     for item in products_data:
-        if not item.get('title'):
+        title = item.get('title')
+        if not title:
             continue
+
+        raw_url = item.get('url')
+        product_url = raw_url if raw_url and raw_url.startswith("http") else f"https://www.flipkart.com/search?q={urllib.parse.quote_plus(title)}"
             
         products.append(ProductItem(
-            title=item.get('title'),
+            title=title,
             price=item.get('price'),
             rating=format_rating_out_of_5(item.get('rating')),
             rating_count=clean_rating_count(item.get('rating_count')),
-            url=item.get('url'),
+            url=product_url,
             image_url=item.get('image_url'),
             source="Flipkart",
             bought_past_month=clean_bought_past_month(item.get('bought_past_month')),
