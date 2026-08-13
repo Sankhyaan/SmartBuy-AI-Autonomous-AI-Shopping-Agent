@@ -47,6 +47,30 @@ def format_rating_out_of_5(raw_rating: Optional[str]) -> Optional[str]:
     return None
 
 
+def clean_rating_count(raw_count: Optional[str]) -> Optional[str]:
+    """Clean and strip parentheses/words from rating count e.g. '(1,234)' -> '1,234', '(41.9K)' -> '41.9K'."""
+    if not raw_count:
+        return None
+    import re
+    cleaned = raw_count.replace("(", "").replace(")", "").strip()
+    match = re.search(r"([0-9,]+(?:\.[0-9]+)?[KMBkmb]?)", cleaned)
+    if match:
+        return match.group(1).upper()
+    return cleaned if cleaned else None
+
+
+def clean_bought_past_month(raw_text: Optional[str]) -> Optional[str]:
+    """Extract and standardize 'X+ bought in past month' pattern."""
+    if not raw_text:
+        return None
+    import re
+    match = re.search(r"([0-9KMBkmb\+]+\+?\s*bought in\s*(?:the\s*)?past\s*(?:month|30 days)?)", raw_text, re.IGNORECASE)
+    if match:
+        val = match.group(1).strip()
+        return re.sub(r"([0-9]+)([kmb])", lambda m: m.group(1) + m.group(2).upper(), val, flags=re.IGNORECASE)
+    return None
+
+
 async def safe_text(element: ElementHandle, selector: str, fallback: Optional[str] = None) -> Optional[str]:
     """Safely extract text content from a sub-element with an optional fallback default."""
     try:

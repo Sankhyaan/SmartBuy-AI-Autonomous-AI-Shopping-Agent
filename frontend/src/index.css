@@ -833,9 +833,17 @@ html, body, #root {
   white-space: nowrap;
 }
 
-.product-ratings-count {
+.product-bought {
   font-size: 10px;
-  color: var(--text-muted);
+  font-weight: 500;
+  color: #f97316;
+  background: rgba(249, 115, 22, 0.1);
+  border: 1px solid rgba(249, 115, 22, 0.25);
+  border-radius: 4px;
+  padding: 2px 6px;
+  display: inline-block;
+  margin-top: 2px;
+  width: fit-content;
 }
 
 .product-footer {

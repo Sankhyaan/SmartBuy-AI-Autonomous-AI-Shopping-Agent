@@ -10,7 +10,10 @@ from typing import List
 
 from app.models.schemas import ProductItem
 from app.services.browser.browser_manager import browser_manager
-from app.services.browser.base_scraper import smooth_scroll, safe_text, safe_attribute, format_rating_out_of_5
+from app.services.browser.base_scraper import (
+    smooth_scroll, safe_text, safe_attribute,
+    format_rating_out_of_5, clean_rating_count, clean_bought_past_month
+)
 
 AMAZON_SEARCH_URL = "https://www.amazon.in/s?k={query}"
 
@@ -69,9 +72,14 @@ async def search_amazon(query: str, max_results: int = 50) -> List[ProductItem]:
             rating = format_rating_out_of_5(raw_rating)
 
             # Rating count
-            rating_count = await safe_text(card, "span.a-size-base.s-underline-text")
-            if not rating_count:
-                rating_count = await safe_text(card, "a > span.a-size-base")
+            raw_rating_count = await safe_text(card, "span.a-size-base.s-underline-text")
+            if not raw_rating_count:
+                raw_rating_count = await safe_text(card, "a > span.a-size-base")
+            rating_count = clean_rating_count(raw_rating_count)
+
+            # Bought in past month
+            card_full_text = await card.text_content()
+            bought_past_month = clean_bought_past_month(card_full_text)
 
             # URL
             link = await safe_attribute(card, "h2 a.a-link-normal", "href")
@@ -88,6 +96,7 @@ async def search_amazon(query: str, max_results: int = 50) -> List[ProductItem]:
                 url=product_url,
                 image_url=image_url,
                 source="Amazon",
+                bought_past_month=bought_past_month,
             ))
 
         except Exception:

@@ -28,6 +28,7 @@ class ProductItem(BaseModel):
     url: str = Field(..., description="Direct link to product page")
     image_url: Optional[str] = Field(None, description="Thumbnail image URL")
     source: str = Field(..., description="Platform e.g. Amazon, Flipkart")
+    bought_past_month: Optional[str] = Field(None, description="e.g. 10K+ bought in past month")
 
 
 class ProductSearchResponse(BaseModel):

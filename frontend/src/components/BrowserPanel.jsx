@@ -281,11 +281,19 @@ export default function BrowserPanel() {
                       <div className="product-meta">
                         <span className="product-price">{product.price}</span>
                         {product.rating ? (
-                          <span className="product-rating">⭐ {product.rating}</span>
+                          <span className="product-rating">
+                            ⭐ {product.rating}
+                            {product.rating_count && ` (${product.rating_count})`}
+                          </span>
                         ) : (
                           <span className="product-rating muted">⭐ N/A</span>
                         )}
                       </div>
+                      {product.bought_past_month && (
+                        <div className="product-bought">
+                          🔥 {product.bought_past_month}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}

@@ -10,7 +10,10 @@ from typing import List
 
 from app.models.schemas import ProductItem
 from app.services.browser.browser_manager import browser_manager
-from app.services.browser.base_scraper import smooth_scroll, safe_text, safe_attribute, format_rating_out_of_5
+from app.services.browser.base_scraper import (
+    smooth_scroll, safe_text, safe_attribute,
+    format_rating_out_of_5, clean_rating_count, clean_bought_past_month
+)
 
 FLIPKART_SEARCH_URL = "https://www.flipkart.com/search?q={query}"
 
@@ -113,6 +116,9 @@ async def search_flipkart(query: str, max_results: int = 50) -> List[ProductItem
                 }}
             }}
             
+            // Bought in past month text if present
+            const boughtLine = texts.find(t => t.toLowerCase().includes('bought in') || t.toLowerCase().includes('bought')) || '';
+
             // Image might be inside or nearby
             const img = c.querySelector('img');
             const image_url = img ? img.src : '';
@@ -123,6 +129,7 @@ async def search_flipkart(query: str, max_results: int = 50) -> List[ProductItem
                 price: price,
                 rating: rating,
                 rating_count: ratingCount,
+                bought_past_month: boughtLine,
                 image_url: image_url
             }};
         }});
@@ -136,10 +143,11 @@ async def search_flipkart(query: str, max_results: int = 50) -> List[ProductItem
             title=item.get('title'),
             price=item.get('price'),
             rating=format_rating_out_of_5(item.get('rating')),
-            rating_count=item.get('rating_count'),
+            rating_count=clean_rating_count(item.get('rating_count')),
             url=item.get('url'),
             image_url=item.get('image_url'),
             source="Flipkart",
+            bought_past_month=clean_bought_past_month(item.get('bought_past_month')),
         ))
 
     return products
